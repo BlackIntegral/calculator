@@ -5,17 +5,9 @@
 /*
 type definition
 	begin:			'<'
-	characters:		'A'
 	numbers:		'1'
-	.:				'.'
-	+:				'+'
-	-:				'-'
-	*:				'*'
-	/:				'/'
-	^:				'^'
-	(:				'('
-	):				')'
 	end:			'>'
+	else:			type = sprite
 */
 
 
