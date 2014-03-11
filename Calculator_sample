@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<conio.h>
 #include<stdlib.h>
+#include<math.h>
 
 /*
 type definition
@@ -15,46 +16,127 @@ type definition
 typedef struct data{
 	data *to;
 	data *from;
-	int value;
+	float value;
 	int type;
 	char sprite;
 }data;
 data node[100];
 
-data *head,*tail,*reader;
+data *head,*tail,*reader,*sign,*beforesign;
 
+data *BEGIN,*END;
+
+data *op,*bi1,*bi2;
+
+int error();
+int sign_adjust(data *_from, data *_to);
 int parsing();
-void assign(int i);
-void despace(int N);
-void read();
+int assign(int i);
+int despace();
+int read();
+int numerize();
+int PRD(data *_from, data *_to);
+int DIV(data *_from, data *_to);
+int SUM(data *_from, data *_to);
+int POW(data *_from, data *_to);
 
 int main()
 {
-	int i,N;
-	N=parsing();
-	read();
+	int i,error;
+	error=parsing();
+	printf(" %c\n %c    Operating chain terminated\n\n",179,179);
 }
 
 int parsing()
 {
-	int i=1;
+	data *_from,*_to,*_inside;
+	int i=1,error=0;
+	printf(" %c\n %c\n %c  ",179,179,179);
 	do
 	{
 		scanf("%c",&node[i].sprite);
 		assign(i);
 		i++;
 	}while(node[i-1].sprite!='\n');
-	int N=i;
+	BEGIN=&node[0];
+	END=&node[i-1];
 	
-	despace(N);
+	if(node[1].type=='t' && node[2].type=='e' && node[3].type=='r' && node[4].type=='m' && node[5].type=='i' && node[6].type=='n' && node[7].type=='a' && node[8].type=='t' && node[9].type=='e' && node[10].type=='>')
+	return 0;
 	
-	return N;
+	despace();
+	sign_adjust(BEGIN,END);
+	
+	_to=&node[0];
+	while((*_to).type!='>')
+	{
+		if((*_to).type==')')
+		{
+			_from=_to;
+			while((*_from).type!='(')
+			{
+				_from=(*_from).from;
+			}
+			error=POW(_from,_to);	if(error==1)return 1;
+			error=DIV(_from,_to);	if(error==1)return 1;
+			error=PRD(_from,_to);	if(error==1)return 1;
+			error=SUM(_from,_to);	if(error==1)return 1;
+			_inside=(*_from).to;
+			if((*_inside).type!='1')
+			_inside=(*_inside).to;
+			(*_from).type='1';
+			(*_from).value=(*_inside).value;
+			(*_from).to=(*_to).to;
+			_to=(*_to).to;
+			(*_to).from=_from;
+			_to=_from;
+			numerize();
+		}
+		_to=(*_to).to;
+		
+	}
+	_from=&node[0];
+	error=POW(_from,_to);	if(error==1)return 1;
+	error=DIV(_from,_to);	if(error==1)return 1;
+	error=PRD(_from,_to);	if(error==1)return 1;
+	error=SUM(_from,_to);		if(error==1)return 1;
+	
+	read();
+	parsing();
+	
+	return 0;
 }
 
-void assign(int i)
+int sign_adjust(data *_from, data *_to)
 {
-	node[0].value=0;
-	node[0].type='<';
+	head=(*_from).to;
+	while(head!=_to)
+	{
+		tail=(*head).from;
+		if(((*tail).type=='+' && (*head).type=='+') || ((*tail).type=='-' && (*head).type=='-'))
+		{
+			(*tail).type='+';
+			head=(*head).to;
+			(*tail).to=head;
+			(*head).from=tail;
+			head=tail;
+		}
+		else if(((*tail).type=='+' && (*head).type=='-') || ((*tail).type=='-' && (*head).type=='+'))
+		{
+			(*tail).type='-';
+			head=(*head).to;
+			(*tail).to=head;
+			(*head).from=tail;
+			head=tail;
+		}
+		head=(*head).to;
+	}
+}
+
+int assign(int i)
+{
+		node[0].value=0;
+		node[0].type='<';
 	
 	if(48<=node[i].sprite && node[i].sprite<=57)
 	{
@@ -82,9 +164,10 @@ void assign(int i)
 	
 	node[i-1].to=&node[i];
 	node[i].from=&node[i-1];
+	return 0;
 }
 
-void despace(int N)
+int despace()
 {
 	head=&node[0];
 	do
@@ -96,21 +179,279 @@ void despace(int N)
 			{
 				head=(*head).to;
 			}
-			(*tail).to=&(*head);
+			(*tail).to=head;
+			(*head).from=tail;
 			head=tail;
 		}
 		head=(*head).to;
 	}while((*head).type!='>');
+	head=&node[0];
+	tail=&node[0];
+	return 0;
 }
 
-void read()
+int read()
 {
+	printf(" %c\n %c   %c  ",179,179,175);
 	reader=&node[0];
 	do
 	{
+		if((*reader).type=='<')
+		printf(" ");
+		else if((*reader).type=='1')
+		printf("%.7g",(*reader).value);
+		else
 		printf("%c",(*reader).type);
 		reader=(*reader).to;
 		if((*reader).type=='>')
-		printf("%c",(*reader).type);
+		printf(" ");
 	}while((*reader).type!='>');
+	printf("\n");
+	return 0;
+}
+
+int numerize()
+{
+	float order;
+	head=&node[0];
+	do
+	{
+		order=10.0;
+		if((*head).type=='1')
+		{
+			tail=head;
+			sign=(*tail).from;
+			beforesign=(*sign).from;
+			head=(*head).to;
+			while((*head).type=='1')
+			{
+				(*tail).value=(*tail).value*10.0+(*head).value;
+				head=(*head).to;
+			}
+			
+			if((*head).type=='.')
+			{
+				head=(*head).to;
+				while((*head).type=='1')
+				{
+					(*tail).value=(*tail).value+(*head).value/order;
+					order*=10.0;
+					head=(*head).to;
+				}
+			}
+			(*tail).to=head;
+			(*head).from=tail;
+			if((*sign).type=='-')
+			{
+				(*tail).value*=-1;
+				(*sign).type='+';
+			}
+			if((*sign).type=='+'&&(*beforesign).type=='<')
+			{
+				(*beforesign).to=tail;
+				(*tail).from=beforesign;
+			}
+			head=tail;
+		}
+		head=(*head).to;
+	}while((*head).type!='>');
+	head=&node[0];
+	tail=&node[0];
+	return 0;
+}
+
+int PRD(data *_from, data *_to)
+{
+	numerize();
+	op=_from;
+	while(op!=_to)
+	{
+		if((*op).type=='*')
+		{
+			bi1=(*op).from;
+			bi2=(*op).to;
+			if((*bi1).type=='1')
+			{
+				if((*bi2).type=='1')
+				{
+					(*bi1).value = ((*bi1).value)*((*bi2).value);
+					op=(*bi2).to;
+					(*bi1).to=op;
+					(*op).from=bi1;
+					op=bi1;
+				}
+				else if((*bi2).type=='+')
+				{
+					bi2=(*bi2).to;
+					(*bi1).value = ((*bi1).value)*((*bi2).value);
+					op=(*bi2).to;
+					(*bi1).to=op;
+					(*op).from=bi1;
+					op=bi1;
+				}
+				else if((*bi2).type=='(')
+				{}
+				else
+				{
+					error();
+					return 1;
+				}
+			}
+			else if((*bi1).type==')')
+			{}
+			else
+			{
+				error();
+				return 1;
+			}
+		}
+		op=(*op).to;
+	}
+	return 0;
+}
+
+int DIV(data *_from, data *_to)
+{
+	numerize();
+	op=_from;
+	while(op!=_to)
+	{
+		if((*op).type=='/')
+		{
+			bi1=(*op).from;
+			bi2=(*op).to;
+			if((*bi1).type=='1')
+			{
+				if((*bi2).type=='1')
+				{
+					(*bi1).value = ((*bi1).value)/((*bi2).value);
+					op=(*bi2).to;
+					(*bi1).to=op;
+					(*op).from=bi1;
+					op=bi1;
+				}
+				else if((*bi2).type=='+')
+				{
+					bi2=(*bi2).to;
+					(*bi1).value = ((*bi1).value)/((*bi2).value);
+					op=(*bi2).to;
+					(*bi1).to=op;
+					(*op).from=bi1;
+					op=bi1;
+				}
+				else if((*bi2).type=='(')
+				{}
+				else
+				{
+					error();
+					return 1;
+				}
+			}
+			else if((*bi1).type==')')
+			{}
+			else
+			{
+				error();
+				return 1;
+			}
+		}
+		op=(*op).to;
+	}
+	return 0;
+}
+
+int SUM(data *_from, data *_to)
+{
+	numerize();
+	op=_from;
+	while(op!=_to)
+	{
+		if((*op).type=='+')
+		{
+			bi1=(*op).from;
+			bi2=(*op).to;
+			if((*bi1).type=='1')
+			{
+				if((*bi2).type=='1')
+				{
+					(*bi1).value = ((*bi1).value)+((*bi2).value);
+					op=(*bi2).to;
+					(*bi1).to=op;
+					(*op).from=bi1;
+					op=bi1;
+				}
+				else if(bi2==_to || (*bi2).type==')' || (*bi2).type=='(')
+				{}
+				else
+				{
+					error();
+					return 1;
+				}
+			}
+			else if(bi1==_from || (*bi1).type==')' || (*bi1).type=='(')
+			{}
+			else
+			{
+				error();
+				return 1;
+			}
+		}
+		op=(*op).to;
+	}
+	return 0;
+}
+
+int POW(data *_from, data *_to)
+{
+	numerize();
+	op=_from;
+	while(op!=_to)
+	{
+		if((*op).type=='^')
+		{
+			bi1=(*op).from;
+			bi2=(*op).to;
+			if((*bi1).type=='1')
+			{
+				if((*bi2).type=='1')
+				{
+					(*bi1).value = pow(((*bi1).value),((*bi2).value));
+					op=(*bi2).to;
+					(*bi1).to=op;
+					(*op).from=bi1;
+					op=bi1;
+				}
+				else if((*bi2).type=='+')
+				{
+					bi2=(*bi2).to;
+					(*bi1).value = pow(((*bi1).value),((*bi2).value));
+					op=(*bi2).to;
+					(*bi1).to=op;
+					(*op).from=bi1;
+					op=bi1;
+				}
+				else if((*bi2).type=='(')
+				{}
+				else
+				{
+					error();
+					return 1;
+				}
+			}
+			else if((*bi1).type==')')
+			{}
+			else
+			{
+				error();
+				return 1;
+			}
+		}
+		op=(*op).to;
+	}
+	return 0;
+}
+
+int error()
+{
+	printf(" %c\n %c    Syntax Error.\n",179,179);
 }
