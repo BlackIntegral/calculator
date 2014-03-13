@@ -179,7 +179,7 @@
 		}
 		
 		despace();
-		numerize();\
+		numerize();
 		sign_adjust(BEGIN,END);
 		debugFCT();
 		_to=&node[0];
