@@ -192,9 +192,9 @@
 				{
 					_from=(*_from).from;
 				}
-				error=E(_from,_to);				if(error==1)goto again;
+				error=E(_from,_to);			if(error==1)goto again;
 				error=FCT(_from,_to);			if(error==1)goto again;
-				error=enfunction(_from,_to);	if(error==1)goto again;
+				error=enfunction(_from,_to);		if(error==1)goto again;
 				error=POW(_from,_to);			if(error==1)goto again;
 				error=DIV(_from,_to);			if(error==1)goto again;
 				error=PRD(_from,_to);			if(error==1)goto again;
@@ -219,9 +219,9 @@
 			
 		}
 		_from=&node[0];
-		error=E(_from,_to);				if(error==1)goto again;
+		error=E(_from,_to);			if(error==1)goto again;
 		error=FCT(_from,_to);			if(error==1)goto again;
-		error=enfunction(_from,_to);	if(error==1)goto again;
+		error=enfunction(_from,_to);		if(error==1)goto again;
 		error=POW(_from,_to);			if(error==1)goto again;
 		error=DIV(_from,_to);			if(error==1)goto again;
 		error=PRD(_from,_to);			if(error==1)goto again;
