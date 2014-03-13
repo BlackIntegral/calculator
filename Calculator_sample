@@ -1,295 +1,1182 @@
-#include<stdio.h>
-#include<conio.h>
-#include<stdlib.h>
-#include<math.h>
 
-/*
-type definition
-	begin:			'<'
-	numbers:		'1'
-	dots:			'.'
-	end:			'>'
-	else:			type = sprite
-*/
-
-
-typedef struct data{
-	data *to;
-	data *from;
-	float value;
-	int type;
-	char sprite;
-}data;
-data node[100];
-
-data *head,*tail,*reader,*sign,*beforesign;
-
-data *BEGIN,*END;
-
-data *op,*bi1,*bi2;
-
-int error();
-int sign_adjust(data *_from, data *_to);
-int parsing();
-int assign(int i);
-int despace();
-int read();
-int numerize();
-int PRD(data *_from, data *_to);
-int DIV(data *_from, data *_to);
-int SUM(data *_from, data *_to);
-int POW(data *_from, data *_to);
-
-int main()
-{
-	int i,error;
-	error=parsing();
-	printf(" %c\n %c    Operating chain terminated\n\n",179,179);
-}
-
-int parsing()
-{
-	data *_from,*_to,*_inside;
-	int i=1,error=0;
-	printf(" %c\n %c\n %c  ",179,179,179);
-	do
-	{
-		scanf("%c",&node[i].sprite);
-		assign(i);
-		i++;
-	}while(node[i-1].sprite!='\n');
-	BEGIN=&node[0];
-	END=&node[i-1];
+	#include<stdio.h>
+	#include<conio.h>
+	#include<stdlib.h>
+	#include<math.h>
 	
-	if(node[1].type=='t' && node[2].type=='e' && node[3].type=='r' && node[4].type=='m' && node[5].type=='i' && node[6].type=='n' && node[7].type=='a' && node[8].type=='t' && node[9].type=='e' && node[10].type=='>')
-	return 0;
+	/*
+	Type definitions
+		begin:			'<'
+		numbers:		'1'
+		dots:			'.'
+		end:			'>'
+		else:			type = sprite
 	
-	despace();
-	sign_adjust(BEGIN,END);
+	Available functions
+		asin
+		asinh
+		acos
+		acosh
+		atan
+		atanh
+		cos
+		cosh
+		sin
+		sinh
+		sqrt
+		erf
+		erfc
+		exp
+		log
+		ln
+		tan
+		tanh
 	
-	_to=&node[0];
-	while((*_to).type!='>')
-	{
-		if((*_to).type==')')
-		{
-			_from=_to;
-			while((*_from).type!='(')
-			{
-				_from=(*_from).from;
-			}
-			error=POW(_from,_to);	if(error==1)return 1;
-			error=DIV(_from,_to);	if(error==1)return 1;
-			error=PRD(_from,_to);	if(error==1)return 1;
-			error=SUM(_from,_to);	if(error==1)return 1;
-			_inside=(*_from).to;
-			if((*_inside).type!='1')
-			_inside=(*_inside).to;
-			(*_from).type='1';
-			(*_from).value=(*_inside).value;
-			(*_from).to=(*_to).to;
-			_to=(*_to).to;
-			(*_to).from=_from;
-			_to=_from;
-			numerize();
-		}
-		_to=(*_to).to;
+	Available Units
+		unit[0]:	kg;				[ 1 0 0 0 0 0]
+		unit[1]:	m;				[ 0 1 0 0 0 0]
+		unit[2]:	s;				[ 0 0 1 0 0 0]
+		unit[3]:	A;				[ 0 0 0 1 0 0]
+		unit[4]:	K;				[ 0 0 0 0 1 0]
+		unit[5]:	cd;				[ 0 0 0 0 0 1]
+	
+	Other Units
+		<dimensionless>:			[ 0 0 0 0 0 0]
+		rad/deg:					[ 0 0 0 0 0 0]
+		ton/lb/amu:					[ 1 0 0 0 0 0]
+		inch/ft/yard/mile/league:	[ 0 1 0 0 0 0]
+		Angstrom/Bohr radius/au:	[ 0 1 0 0 0 0]
+		litre:						[ 0 3 0 0 0 0]
+		Hz:							[ 0 0-1 0 0 0]
+		hr/min:						[ 0 0 1 0 0 0]
+		N:							[ 1 1-2 0 0 0]
+		Pa/atm:						[ 1-1-2 0 0 0]
+		J/eV:						[ 1 2-2 0 0 0]
+		W:							[ 1 2-3 0 0 0]
+		C:							[ 0 0 1 1 0 0]
+		V:							[ 1 2-3-1 0 0]
+		F:							[-1-2 4 2 0 0]
+		Ohm:						[ 1 2-3-2 0 0]
+		S:							[-1-2 3 2 0 0]
+		Wb:							[ 1 2-2-1 0 0]
+		T:							[ 1 0-2-1 0 0]
+		H:							[ 1 2-2-2 0 0]
+		dC/dF:						[ 0 0 0 0 1 0]
+		lm:							[ 0 0 0 0 0 1]
+		lx:							[ 0-1 0 0 0 1]
+		Bq:							[ 0 0-1 0 0 0]
+		Gy = Sv:					[ 0 2-2 0 0 0]
 		
-	}
-	_from=&node[0];
-	error=POW(_from,_to);	if(error==1)return 1;
-	error=DIV(_from,_to);	if(error==1)return 1;
-	error=PRD(_from,_to);	if(error==1)return 1;
-	error=SUM(_from,_to);		if(error==1)return 1;
+	Constants
+		electron mass/protron mass:	[ 1 0 0 0 0 0]
+		Sun mass/Earth mass:		[ 1 0 0 0 0 0]
+		Sun radius/Earth radius:	[ 0 1 0 0 0 0]
+		c/speed of light:			[ 0 1-1 0 0 0]
+		h/hbar:						[ 1 2-1 0 0 0]
+		elementary charge:			[ 0 0 1 1 0 0]
+		G:							[-1 3-2 0 0 0]
+		Coulomb's constant:			[ 1 3-4-2 0 0]
+		Boltzmann constant:			[ 1 2-2 0-1 0]
+		mu:							[ 1 1-2-2 0 0]
+		ep:							[-1-3 4 2 0 0]
+		Rydhberg constant:			[ 0-1 0 0 0 0]
+		
+	(Dimensionless) Prefixes
+		yocto						1e-24
+		zepto						1e-21
+		atta						1e-18
+		femto						1e-15
+		pico						1e-12
+		nano						1e-9
+		micro						1e-6
+		milli						0.001
+		centi						0.01
+		deci						0.1
+		deca						10
+		hecto						100
+		kilo						1000
+		mega						1e+6
+		giga						1e+9
+		tera						1e+12
+		peta						1e+15
+		exa							1e+18
+		zetta						1e+21
+		yotta						1e+24
+	*/
 	
-	read();
-	parsing();
+	double ans=0.00;
 	
-	return 0;
-}
-
-int sign_adjust(data *_from, data *_to)
-{
-	head=(*_from).to;
-	while(head!=_to)
+	typedef struct data{
+		data *to;
+		data *from;
+		double value;
+		int type;
+		char sprite;
+		int unit[6];
+	}data;
+	data node[100];
+	
+	data *head,*tail,*reader,*sign,*beforesign;
+	
+	data *BEGIN,*END;
+	
+	data *op,*bi1,*bi2;
+	int error();
+	int help();
+	int sign_adjust(data *_from, data *_to);
+	int debug_sign_adjust(data *_from, data *_to);
+	int parsing();
+	int assign(int i);
+	int despace();
+	int read();
+	int numerize();
+	int PRD(data *_from, data *_to);
+	int DIV(data *_from, data *_to);
+	int SUM(data *_from, data *_to);
+	int POW(data *_from, data *_to);
+	int E(data *_from, data *_to);
+	int FCT(data *_from, data *_to);
+	double _fct(double n);
+	int debugFCT();
+	int enfunction(data *_from, data *_to);
+	int enunit(data *_from, data *_to);
+	
+	int main()
 	{
-		tail=(*head).from;
-		if(((*tail).type=='+' && (*head).type=='+') || ((*tail).type=='-' && (*head).type=='-'))
+		int i,error;
+		printf(" %c\n %c Enter <help> for more information\n %c or <terminate> to exit program\n",179,179,179);
+		error=parsing();
+		printf(" %c\n %c    Operating chain terminated\n\n",179,179);
+		getch();
+	}
+	
+	int parsing()
+	{
+		data *_from,*_to,*_inside,*move;
+		int i=1,error=0;
+		printf(" %c\n %c ",179,179,179);
+		do
 		{
-			(*tail).type='+';
-			head=(*head).to;
-			(*tail).to=head;
-			(*head).from=tail;
-			head=tail;
-		}
-		else if(((*tail).type=='+' && (*head).type=='-') || ((*tail).type=='-' && (*head).type=='+'))
+			scanf("%c",&node[i].sprite);
+			assign(i);
+			i++;
+		}while(node[i-1].sprite!='\n');
+		BEGIN=&node[0];
+		END=&node[i-1];
+		
+		if(node[1].type=='t' && node[2].type=='e' && node[3].type=='r' && node[4].type=='m' && node[5].type=='i' && node[6].type=='n' && node[7].type=='a' && node[8].type=='t' && node[9].type=='e' && node[10].type=='>')
+		return 0;
+		
+		if(node[1].type=='h' && node[2].type=='e' && node[3].type=='l' && node[4].type=='p' && node[5].type=='>')
 		{
-			(*tail).type='-';
-			head=(*head).to;
-			(*tail).to=head;
-			(*head).from=tail;
-			head=tail;
+			help();
+			goto again;
 		}
-		head=(*head).to;
+		
+		if(node[1].type=='c' && node[2].type=='l' && node[3].type=='e' && node[4].type=='a' && node[5].type=='r' && node[6].type=='>')
+		{
+			system("cls");
+			goto again;
+		}
+		
+		despace();
+		numerize();\
+		sign_adjust(BEGIN,END);
+		debugFCT();
+		_to=&node[0];
+		while((*_to).type!='>')
+		{
+			if((*_to).type==')')
+			{
+				_from=_to;
+				while((*_from).type!='(')
+				{
+					_from=(*_from).from;
+				}
+				error=E(_from,_to);				if(error==1)goto again;
+				error=FCT(_from,_to);			if(error==1)goto again;
+				error=enfunction(_from,_to);	if(error==1)goto again;
+				error=POW(_from,_to);			if(error==1)goto again;
+				error=DIV(_from,_to);			if(error==1)goto again;
+				error=PRD(_from,_to);			if(error==1)goto again;
+				error=SUM(_from,_to);			if(error==1)goto again;
+				debug_sign_adjust(_from,_to);
+				_inside=(*_from).to;
+				move=(*_inside).to;
+				if((*_from).type=='(' && (*move).type==')')
+				{
+					if((*_inside).type!='1')
+					_inside=(*_inside).to;
+					(*_from).type='1';
+					(*_from).value=(*_inside).value;
+					(*_from).to=(*_to).to;
+					_to=(*_to).to;
+					(*_to).from=_from;
+					_to=_from;
+					numerize();
+				}
+			}
+			_to=(*_to).to;
+			
+		}
+		_from=&node[0];
+		error=E(_from,_to);				if(error==1)goto again;
+		error=FCT(_from,_to);			if(error==1)goto again;
+		error=enfunction(_from,_to);	if(error==1)goto again;
+		error=POW(_from,_to);			if(error==1)goto again;
+		error=DIV(_from,_to);			if(error==1)goto again;
+		error=PRD(_from,_to);			if(error==1)goto again;
+		error=SUM(_from,_to);			if(error==1)goto again;
+		
+		op=(*BEGIN).to;
+		check:
+		if((*op).from==BEGIN && (*op).type=='1' && (*op).to==END)
+		{
+			ans=(*op).value;
+			read();
+		}
+		else
+		{
+			printf(" %c\n %c  Syntax Error.\n",179,179);
+		}
+		again:
+		parsing();
+		
+		return 0;
 	}
-}
-
-int assign(int i)
-{
-		node[0].value=0;
-		node[0].type='<';
 	
-	if(48<=node[i].sprite && node[i].sprite<=57)
+	int sign_adjust(data *_from, data *_to)
 	{
-		node[i].value = node[i].sprite - 48;
-		node[i].type = '1';
-	}
-	
-	else if(node[i].sprite=='.')
-	{
-		node[i].value = 0;
-		node[i].type = '.';
-	}
-	
-	else if(node[i].sprite=='\n')
-	{
-		node[i].value = 0;
-		node[i].type = '>';
-	}
-	
-	else
-	{
-		node[i].value = 0;
-		node[i].type = node[i].sprite;
-	}
-	
-	node[i-1].to=&node[i];
-	node[i].from=&node[i-1];
-	return 0;
-}
-
-int despace()
-{
-	head=&node[0];
-	do
-	{
-		if((*head).type==' ')
+		head=(*_from).to;
+		while(head!=_to)
 		{
 			tail=(*head).from;
-			while((*head).type==' ')
+			if(((*tail).type=='+' && (*head).type=='+') || ((*tail).type=='-' && (*head).type=='-'))
 			{
+				(*tail).type='+';
 				head=(*head).to;
+				(*tail).to=head;
+				(*head).from=tail;
+				head=tail;
 			}
-			(*tail).to=head;
-			(*head).from=tail;
-			head=tail;
-		}
-		head=(*head).to;
-	}while((*head).type!='>');
-	head=&node[0];
-	tail=&node[0];
-	return 0;
-}
-
-int read()
-{
-	printf(" %c\n %c   %c  ",179,179,175);
-	reader=&node[0];
-	do
-	{
-		if((*reader).type=='<')
-		printf(" ");
-		else if((*reader).type=='1')
-		printf("%.7g",(*reader).value);
-		else
-		printf("%c",(*reader).type);
-		reader=(*reader).to;
-		if((*reader).type=='>')
-		printf(" ");
-	}while((*reader).type!='>');
-	printf("\n");
-	return 0;
-}
-
-int numerize()
-{
-	float order;
-	head=&node[0];
-	do
-	{
-		order=10.0;
-		if((*head).type=='1')
-		{
-			tail=head;
-			sign=(*tail).from;
-			beforesign=(*sign).from;
+			else if(((*tail).type=='+' && (*head).type=='-') || ((*tail).type=='-' && (*head).type=='+'))
+			{
+				(*tail).type='-';
+				head=(*head).to;
+				(*tail).to=head;
+				(*head).from=tail;
+				head=tail;
+			}
 			head=(*head).to;
-			while((*head).type=='1')
+		}
+	}
+	
+	int debug_sign_adjust(data *_from, data *_to)
+	{
+		head=(*_from).to;
+		while(head!=_to)
+		{
+			tail=(*head).from;
+			if((*tail).type=='+' && (*head).type=='1')
 			{
-				(*tail).value=(*tail).value*10.0+(*head).value;
+				(*tail).type='1';
+				(*tail).value=(*head).value;
 				head=(*head).to;
+				(*tail).to=head;
+				(*head).from=tail;
+				head=tail;
 			}
-			
-			if((*head).type=='.')
+			head=(*head).to;
+		}
+	}
+	
+	int assign(int i)
+	{
+		int j;
+		for(j=0;j<6;j++)
+		node[i].unit[j]=0;
+		
+		node[0].value=0;
+		node[0].type='<';
+		
+		if(48<=node[i].sprite && node[i].sprite<=57)
+		{
+			node[i].value = node[i].sprite - 48;
+			node[i].type = '1';
+		}
+		
+		else if(node[i].sprite=='.')
+		{
+			node[i].value = 0;
+			node[i].type = '.';
+		}
+		
+		else if(node[i].sprite=='\n')
+		{
+			node[i].value = 0;
+			node[i].type = '>';
+		}
+		
+		else
+		{
+			node[i].value = 0;
+			node[i].type = node[i].sprite;
+		}
+		
+		node[i-1].to=&node[i];
+		node[i].from=&node[i-1];
+		return 0;
+	}
+	
+	int despace()
+	{
+		head=&node[0];
+		do
+		{
+			if((*head).type==' ')
 			{
+				tail=(*head).from;
+				while((*head).type==' ')
+				{
+					head=(*head).to;
+				}
+				(*tail).to=head;
+				(*head).from=tail;
+				head=tail;
+			}
+			head=(*head).to;
+		}while((*head).type!='>');
+		head=&node[0];
+		tail=&node[0];
+		return 0;
+	}
+	
+	int read()
+	{
+		printf(" %c\n %c  =",179,179);
+		reader=&node[0];
+		do
+		{
+			if((*reader).type=='<')
+			printf(" ");
+			else if((*reader).type=='1')
+			printf("%.13g",(*reader).value);
+			else
+			printf("%c",(*reader).type);
+			reader=(*reader).to;
+			if((*reader).type=='>')
+			printf(" ");
+		}while((*reader).type!='>');
+		printf("\n");
+		return 0;
+	}
+	
+	int numerize()
+	{
+		double order;
+		head=&node[0];
+		do
+		{
+			order=10.0;
+			if((*head).type=='1')
+			{
+				tail=head;
+				sign=(*tail).from;
+				beforesign=(*sign).from;
 				head=(*head).to;
 				while((*head).type=='1')
 				{
-					(*tail).value=(*tail).value+(*head).value/order;
-					order*=10.0;
+					(*tail).value=(*tail).value*10.0+(*head).value;
 					head=(*head).to;
 				}
+				
+				if((*head).type=='.')
+				{
+					head=(*head).to;
+					while((*head).type=='1')
+					{
+						(*tail).value=(*tail).value+(*head).value/order;
+						order*=10.0;
+						head=(*head).to;
+					}
+				}
+				(*tail).to=head;
+				(*head).from=tail;
+				if((*sign).type=='-')
+				{
+					(*tail).value*=-1;
+					(*sign).type='+';
+				}
+				if((*sign).type=='+'&&(*beforesign).type=='<')
+				{
+					(*beforesign).to=tail;
+					(*tail).from=beforesign;
+				}
+				head=tail;
 			}
-			(*tail).to=head;
-			(*head).from=tail;
-			if((*sign).type=='-')
+			else if((*head).type=='a')
 			{
-				(*tail).value*=-1;
-				(*sign).type='+';
+				bi1=head;
+				op=(*bi1).to;
+				bi2=(*op).to;
+				if((*bi1).type=='a' && (*op).type=='n' && (*bi2).type=='s')
+				{
+					(*bi1).type='1';
+					(*bi1).value=ans;
+					bi2=(*bi2).to;
+					(*bi1).to=bi2;
+					(*bi2).from=bi1;
+				}
 			}
-			if((*sign).type=='+'&&(*beforesign).type=='<')
+			else if((*head).type=='p')
 			{
-				(*beforesign).to=tail;
-				(*tail).from=beforesign;
+				bi1=head;
+				op=(*bi1).to;
+				bi2=op;
+				data *check,*check2;
+				check=(*op).to;
+				check2=(*bi1).from;
+				if((*bi1).type=='p' && (*op).type=='i' && (*check).type!='1' && (*check2).type!='1')
+				{
+					(*bi1).type='1';
+					(*bi1).value=acos(-1);
+					bi2=(*bi2).to;
+					(*bi1).to=bi2;
+					(*bi2).from=bi1;
+				}
 			}
+			else if((*head).type=='P')
+			{
+				bi1=head;
+				op=(*bi1).to;
+				bi2=op;
+				data *check,*check2;
+				check=(*op).to;
+				check2=(*bi1).from;
+				if((*bi1).type=='P' && (*op).type=='I' && (*check).type!='1' && (*check2).type!='1')
+				{
+					(*bi1).type='1';
+					(*bi1).value=acos(-1);
+					bi2=(*bi2).to;
+					(*bi1).to=bi2;
+					(*bi2).from=bi1;
+				}
+				else if((*bi1).type=='P' && (*op).type=='i' && (*check).type!='1' && (*check2).type!='1')
+				{
+					(*bi1).type='1';
+					(*bi1).value=acos(-1);
+					bi2=(*bi2).to;
+					(*bi1).to=bi2;
+					(*bi2).from=bi1;
+				}
+			}
+			head=(*head).to;
+		}while((*head).type!='>');
+		head=&node[0];
+		tail=&node[0];
+		return 0;
+	}
+	
+	double _fct(double n)
+	{
+		if(n==0.0)
+		return 1.0;
+		else
+		return n*_fct(n-1.0);
+	}
+	
+	int debugFCT()
+	{
+		double order;
+		head=&node[0];
+		do
+		{
+			order=10.0;
+			if((*head).type=='!')
+			{
+				op=head;
+				bi1=(*op).from;
+				if((*bi1).type=='1')
+				{
+					if(floor((*bi1).value)==(*bi1).value)
+					{
+						if((*bi1).value==0)
+						(*bi1).value=1.0;
+						if((*bi1).value<0)
+						{
+							(*bi1).value=-_fct((*bi1).value);
+						}
+						if((*bi1).value>0)
+						{
+							(*bi1).value=_fct((*bi1).value);
+						}
+						op=(*op).to;
+						(*bi1).to=op;
+						(*op).from=bi1;
+						op=bi1;
+					}
+				}
+				else
+				{}
+			}
+			head=(*head).to;
+		}while((*head).type!='>');
+		head=&node[0];
+		tail=&node[0];
+		return 0;
+	}
+	
+	int PRD(data *_from, data *_to)
+	{
+		numerize();
+		sign_adjust(_from,_to);
+		op=_from;
+		while(op!=_to)
+		{
+			if((*op).type=='*')
+			{
+				bi1=(*op).from;
+				bi2=(*op).to;
+				if((*bi1).type=='1')
+				{
+					if((*bi2).type=='1')
+					{
+						(*bi1).value = ((*bi1).value)*((*bi2).value);
+						op=(*bi2).to;
+						(*bi1).to=op;
+						(*op).from=bi1;
+						op=bi1;
+					}
+					else if((*bi2).type=='+')
+					{
+						bi2=(*bi2).to;
+						(*bi1).value = ((*bi1).value)*((*bi2).value);
+						op=(*bi2).to;
+						(*bi1).to=op;
+						(*op).from=bi1;
+						op=bi1;
+					}
+					else if((*bi2).type=='(')
+					{}
+					else
+					{
+						error();
+						return 1;
+					}
+				}
+				else if((*bi1).type==')')
+				{}
+				else
+				{
+					error();
+					return 1;
+				}
+			}
+			op=(*op).to;
+		}
+		return 0;
+	}
+	
+	int DIV(data *_from, data *_to)
+	{
+		numerize();
+		sign_adjust(_from,_to);
+		op=_from;
+		while(op!=_to)
+		{
+			if((*op).type=='/')
+			{
+				bi1=(*op).from;
+				bi2=(*op).to;
+				if((*bi1).type=='1')
+				{
+					if((*bi2).type=='1')
+					{
+						(*bi1).value = ((*bi1).value)/((*bi2).value);
+						op=(*bi2).to;
+						(*bi1).to=op;
+						(*op).from=bi1;
+						op=bi1;
+					}
+					else if((*bi2).type=='+')
+					{
+						bi2=(*bi2).to;
+						(*bi1).value = ((*bi1).value)/((*bi2).value);
+						op=(*bi2).to;
+						(*bi1).to=op;
+						(*op).from=bi1;
+						op=bi1;
+					}
+					else if((*bi2).type=='(')
+					{}
+					else
+					{
+						error();
+						return 1;
+					}
+				}
+				else if((*bi1).type==')')
+				{}
+				else
+				{
+					error();
+					return 1;
+				}
+			}
+			op=(*op).to;
+		}
+		return 0;
+	}
+	
+	int SUM(data *_from, data *_to)
+	{
+		numerize();
+		sign_adjust(_from,_to);
+		op=_from;
+		while(op!=_to)
+		{
+			if((*op).type=='+')
+			{
+				bi1=(*op).from;
+				bi2=(*op).to;
+				if((*bi1).type=='1')
+				{
+					if((*bi2).type=='1')
+					{
+						(*bi1).value = ((*bi1).value)+((*bi2).value);
+						op=(*bi2).to;
+						(*bi1).to=op;
+						(*op).from=bi1;
+						op=bi1;
+					}
+					else if(bi2==_to || (*bi2).type==')' || (*bi2).type=='(')
+					{}
+					else
+					{
+						error();
+						return 1;
+					}
+				}
+				else if(bi1==_from || (*bi1).type==')' || (*bi1).type=='(')
+				{}
+				else
+				{
+					error();
+					return 1;
+				}
+			}
+			op=(*op).to;
+		}
+		return 0;
+	}
+		
+	int POW(data *_from, data *_to)
+	{
+		numerize();
+		sign_adjust(_from,_to);
+		op=_from;
+		while(op!=_to)
+		{
+			if((*op).type=='^')
+			{
+				bi1=(*op).from;
+				bi2=(*op).to;
+				if((*bi1).type=='1')
+				{
+					if((*bi2).type=='1')
+					{
+						(*bi1).value = pow(((*bi1).value),((*bi2).value));
+						op=(*bi2).to;
+						(*bi1).to=op;
+						(*op).from=bi1;
+						op=bi1;
+					}
+					else if((*bi2).type=='+')
+					{
+						bi2=(*bi2).to;
+						(*bi1).value = pow(((*bi1).value),((*bi2).value));
+						op=(*bi2).to;
+						(*bi1).to=op;
+						(*op).from=bi1;
+						op=bi1;
+					}
+					else if((*bi2).type=='(')
+					{}
+					else
+					{
+						error();
+						return 1;
+					}
+				}
+				else if((*bi1).type==')')
+				{}
+				else
+				{
+					error();
+					return 1;
+				}
+			}
+			op=(*op).to;
+		}
+		return 0;
+	}
+	
+	int enunit(data *_from, data *_to)
+	{
+		numerize();
+		tail=_from;
+		while(tail!=_to)
+		{
+			
+		}
+	}
+	
+	int enfunction(data *_from, data *_to)
+	{
+		double val;
+		numerize();
+		sign_adjust(_from,_to);
+		tail=_from;
+		while(tail!=_to)
+		{
 			head=tail;
-		}
-		head=(*head).to;
-	}while((*head).type!='>');
-	head=&node[0];
-	tail=&node[0];
-	return 0;
-}
-
-int PRD(data *_from, data *_to)
-{
-	numerize();
-	op=_from;
-	while(op!=_to)
-	{
-		if((*op).type=='*')
-		{
-			bi1=(*op).from;
-			bi2=(*op).to;
-			if((*bi1).type=='1')
+			if((*head).type=='a')
 			{
-				if((*bi2).type=='1')
+				head=(*head).to;
+				if((*head).type=='s')
 				{
-					(*bi1).value = ((*bi1).value)*((*bi2).value);
-					op=(*bi2).to;
-					(*bi1).to=op;
-					(*op).from=bi1;
-					op=bi1;
+					head=(*head).to;
+					if((*head).type=='i')
+					{
+						head=(*head).to;
+						if((*head).type=='n')
+						{
+							head=(*head).to;
+							if((*head).type=='1')
+							{
+								(*tail).type='1';
+								val=asin((*head).value);
+								if(val>1E-15 || val<-1E-15)
+								{}
+								else
+								val=0.0;
+								(*tail).value=val;
+								head=(*head).to;
+								(*tail).to=head;
+								(*head).from=tail;
+								head=tail;
+							}
+							
+							else if((*head).type=='h')
+							{
+								head=(*head).to;
+								if((*head).type=='1')
+								{
+									(*tail).type='1';
+									val=asinh((*head).value);
+									if(val>1E-15 || val<-1E-15)
+									{}
+									else
+									val=0.0;
+									(*tail).value=val;
+									head=(*head).to;
+									(*tail).to=head;
+									(*head).from=tail;
+									head=tail;
+								}
+							}
+						}
+					}
 				}
-				else if((*bi2).type=='+')
+				
+				else if((*head).type=='c')
 				{
-					bi2=(*bi2).to;
-					(*bi1).value = ((*bi1).value)*((*bi2).value);
-					op=(*bi2).to;
-					(*bi1).to=op;
-					(*op).from=bi1;
-					op=bi1;
+					head=(*head).to;
+					if((*head).type=='o')
+					{
+						head=(*head).to;
+						if((*head).type=='s')
+						{
+							head=(*head).to;
+							if((*head).type=='1')
+							{
+								(*tail).type='1';
+								val=acos((*head).value);
+								if(val>1E-15 || val<-1E-15)
+								{}
+								else
+								val=0.0;
+								(*tail).value=val;
+								head=(*head).to;
+								(*tail).to=head;
+								(*head).from=tail;
+								head=tail;
+							}
+							
+							else if((*head).type=='h')
+							{
+								head=(*head).to;
+								if((*head).type=='1')
+								{
+									(*tail).type='1';
+									val=acosh((*head).value);
+									if(val>1E-15 || val<-1E-15)
+									{}
+									else
+									val=0.0;
+									(*tail).value=val;
+									head=(*head).to;
+									(*tail).to=head;
+									(*head).from=tail;
+									head=tail;
+								}
+							}
+						}
+					}
 				}
-				else if((*bi2).type=='(')
+					
+				else if((*head).type=='t')
+				{
+					head=(*head).to;
+					if((*head).type=='a')
+					{
+						head=(*head).to;
+						if((*head).type=='n')
+						{
+							head=(*head).to;
+							if((*head).type=='1')
+							{
+								(*tail).type='1';
+								val=atan((*head).value);
+								if(val>1E-15 || val<-1E-15)
+								{}
+								else
+								val=0.0;
+								(*tail).value=val;
+								head=(*head).to;
+								(*tail).to=head;
+								(*head).from=tail;
+								head=tail;
+							}
+							
+							else if((*head).type=='h')
+							{
+								head=(*head).to;
+								if((*head).type=='1')
+								{
+									(*tail).type='1';
+									val=atanh((*head).value);
+									if(val>1E-15 || val<-1E-15)
+									{}
+									else
+									val=0.0;
+									(*tail).value=val;
+									head=(*head).to;
+									(*tail).to=head;
+									(*head).from=tail;
+									head=tail;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			else if((*head).type=='c')
+			{
+				head=(*head).to;
+				if((*head).type=='o')
+				{
+					head=(*head).to;
+					if((*head).type=='s')
+					{
+						head=(*head).to;
+						if((*head).type=='1')
+						{
+							(*tail).type='1';
+							val=cos((*head).value);
+							if(val>1E-15 || val<-1E-15)
+							{}
+							else
+							val=0.0;
+							(*tail).value=val;
+							head=(*head).to;
+							(*tail).to=head;
+							(*head).from=tail;
+							head=tail;
+						}
+						
+						if((*head).type=='h')
+						{
+							head=(*head).to;
+							if((*head).type=='1')
+							{
+								(*tail).type='1';
+								val=cosh((*head).value);
+								if(val>1E-15 || val<-1E-15)
+								{}
+								else
+								val=0.0;
+								(*tail).value=val;
+								head=(*head).to;
+								(*tail).to=head;
+								(*head).from=tail;
+								head=tail;
+							}
+						}
+					}
+				}
+			}
+			
+			else if((*head).type=='s')
+			{
+				head=(*head).to;
+				if((*head).type=='i')
+				{
+					head=(*head).to;
+					if((*head).type=='n')
+					{
+						head=(*head).to;
+						if((*head).type=='1')
+						{
+							(*tail).type='1';
+							val=sin((*head).value);
+							if(val>1E-15 || val<-1E-15)
+							{}
+							else
+							val=0.0;
+							(*tail).value=val;
+							head=(*head).to;
+							(*tail).to=head;
+							(*head).from=tail;
+							head=tail;
+						}
+						
+						if((*head).type=='h')
+						{
+							head=(*head).to;
+							if((*head).type=='1')
+							{
+								(*tail).type='1';
+								val=sinh((*head).value);
+								if(val>1E-15 || val<-1E-15)
+								{}
+								else
+								val=0.0;
+								(*tail).value=val;
+								head=(*head).to;
+								(*tail).to=head;
+								(*head).from=tail;
+								head=tail;
+							}
+						}
+					}
+				}
+				
+				if((*head).type=='q')
+				{
+					head=(*head).to;
+					if((*head).type=='r')
+					{
+						head=(*head).to;
+						if((*head).type=='t')
+						{
+							head=(*head).to;
+							if((*head).type=='1')
+							{
+								(*tail).type='1';
+								(*tail).value=sqrt((*head).value);
+								head=(*head).to;
+								(*tail).to=head;
+								(*head).from=tail;
+								head=tail;
+							}
+						}
+					}
+				}
+			}
+			
+			else if((*head).type=='t')
+			{
+				head=(*head).to;
+				if((*head).type=='a')
+				{
+					head=(*head).to;
+					if((*head).type=='n')
+					{
+						head=(*head).to;
+						if((*head).type=='1')
+						{
+							(*tail).type='1';
+							val=tan((*head).value);
+							if(val>1E-15 || val<-1E-15)
+							{}
+							else
+							val=0.0;
+							(*tail).value=val;
+							head=(*head).to;
+							(*tail).to=head;
+							(*head).from=tail;
+							head=tail;
+						}
+						
+						else if((*head).type=='h')
+						{
+							head=(*head).to;
+							if((*head).type=='1')
+							{
+								(*tail).type='1';
+								val=tanh((*head).value);
+								if(val>1E-15 || val<-1E-15)
+								{}
+								else
+								val=0.0;
+								(*tail).value=val;
+								head=(*head).to;
+								(*tail).to=head;
+								(*head).from=tail;
+								head=tail;
+							}
+						}
+					}
+				}
+			}
+			
+			else if((*head).type=='e')
+			{
+				head=(*head).to;
+				if((*head).type=='r')
+				{
+					head=(*head).to;
+					if((*head).type=='f')
+					{
+						head=(*head).to;
+						if((*head).type=='1')
+						{
+							(*tail).type='1';
+							val=erf((*head).value);
+							(*tail).value=val;
+							head=(*head).to;
+							(*tail).to=head;
+							(*head).from=tail;
+							head=tail;
+						}
+						
+						else if((*head).type=='c')
+						{
+							head=(*head).to;
+							if((*head).type=='1')
+							{
+								(*tail).type='1';
+								val=erfc((*head).value);
+								(*tail).value=val;
+								head=(*head).to;
+								(*tail).to=head;
+								(*head).from=tail;
+								head=tail;
+							}
+						}
+					}
+				}
+				
+				else if((*head).type=='x')
+				{
+					head=(*head).to;
+					if((*head).type=='p')
+					{
+						head=(*head).to;
+						if((*head).type=='1')
+						{
+							(*tail).type='1';
+							(*tail).value=exp((*head).value);
+							head=(*head).to;
+							(*tail).to=head;
+							(*head).from=tail;
+							head=tail;
+						}
+					}
+				}
+			}
+			
+			else if((*head).type=='l')
+			{
+				head=(*head).to;
+				if((*head).type=='n')
+				{
+					head=(*head).to;
+					if((*head).type=='1')
+					{
+						(*tail).type='1';
+						(*tail).value=log((*head).value);
+						head=(*head).to;
+						(*tail).to=head;
+						(*head).from=tail;
+						head=tail;
+					}
+				}
+					
+				else if((*head).type=='o')
+				{
+					head=(*head).to;
+					if((*head).type=='g')
+					{
+						head=(*head).to;
+						if((*head).type=='1')
+						{
+							(*tail).type='1';
+							(*tail).value=log10((*head).value);
+							head=(*head).to;
+							(*tail).to=head;
+							(*head).from=tail;
+							head=tail;
+						}
+					}
+				}
+			}
+			tail=(*tail).to;
+		}
+		return 0;
+	}
+	
+	int E(data *_from, data *_to)
+	{
+		numerize();
+		sign_adjust(_from,_to);
+		op=_from;
+		while(op!=_to)
+		{
+			if((*op).type=='E')
+			{
+				bi1=(*op).from;
+				bi2=(*op).to;
+				if((*bi1).type=='1')
+				{
+					if((*bi2).type=='1')
+					{
+						(*bi1).value = ((*bi1).value)*pow(10,((*bi2).value));
+						op=(*bi2).to;
+						(*bi1).to=op;
+						(*op).from=bi1;
+						op=bi1;
+					}
+					else if((*bi2).type=='+')
+					{
+						bi2=(*bi2).to;
+						(*bi1).value = ((*bi1).value)*pow(10,((*bi2).value));
+						op=(*bi2).to;
+						(*bi1).to=op;
+						(*op).from=bi1;
+						op=bi1;
+					}
+					else if((*bi2).type=='(')
+					{}
+					else
+					{
+						error();
+						return 1;
+					}
+				}
+				else if((*bi1).type==')')
 				{}
 				else
 				{
@@ -297,161 +1184,75 @@ int PRD(data *_from, data *_to)
 					return 1;
 				}
 			}
-			else if((*bi1).type==')')
-			{}
-			else
-			{
-				error();
-				return 1;
-			}
+			op=(*op).to;
 		}
-		op=(*op).to;
+		return 0;
 	}
-	return 0;
-}
-
-int DIV(data *_from, data *_to)
-{
-	numerize();
-	op=_from;
-	while(op!=_to)
+	
+	int FCT(data *_from, data *_to)
 	{
-		if((*op).type=='/')
+		numerize();
+		sign_adjust(_from,_to);
+		op=_from;
+		while(op!=_to)
 		{
-			bi1=(*op).from;
-			bi2=(*op).to;
-			if((*bi1).type=='1')
+			if((*op).type=='!')
 			{
-				if((*bi2).type=='1')
+				bi1=(*op).from;
+				if((*bi1).type=='1')
 				{
-					(*bi1).value = ((*bi1).value)/((*bi2).value);
-					op=(*bi2).to;
-					(*bi1).to=op;
-					(*op).from=bi1;
-					op=bi1;
-				}
-				else if((*bi2).type=='+')
-				{
-					bi2=(*bi2).to;
-					(*bi1).value = ((*bi1).value)/((*bi2).value);
-					op=(*bi2).to;
-					(*bi1).to=op;
-					(*op).from=bi1;
-					op=bi1;
-				}
-				else if((*bi2).type=='(')
-				{}
-				else
-				{
-					error();
-					return 1;
+					if(floor((*bi1).value)==((*bi1).value) && (*bi1).value>=0)
+					{
+						(*bi1).value=_fct((*bi1).value);
+						(*bi1).to=(*op).to;
+						op=(*op).to;
+						(*op).from=bi1;
+						op=bi1;
+					}
 				}
 			}
-			else if((*bi1).type==')')
-			{}
-			else
-			{
-				error();
-				return 1;
-			}
+			op=(*op).to;
 		}
-		op=(*op).to;
+		return 0;
 	}
-	return 0;
-}
-
-int SUM(data *_from, data *_to)
-{
-	numerize();
-	op=_from;
-	while(op!=_to)
+	
+	int error()
 	{
-		if((*op).type=='+')
-		{
-			bi1=(*op).from;
-			bi2=(*op).to;
-			if((*bi1).type=='1')
-			{
-				if((*bi2).type=='1')
-				{
-					(*bi1).value = ((*bi1).value)+((*bi2).value);
-					op=(*bi2).to;
-					(*bi1).to=op;
-					(*op).from=bi1;
-					op=bi1;
-				}
-				else if(bi2==_to || (*bi2).type==')' || (*bi2).type=='(')
-				{}
-				else
-				{
-					error();
-					return 1;
-				}
-			}
-			else if(bi1==_from || (*bi1).type==')' || (*bi1).type=='(')
-			{}
-			else
-			{
-				error();
-				return 1;
-			}
-		}
-		op=(*op).to;
+		printf(" %c\n %c  Syntax Error.\n",179,179);
+		return 0;
 	}
-	return 0;
-}
-
-int POW(data *_from, data *_to)
-{
-	numerize();
-	op=_from;
-	while(op!=_to)
+	
+	int help()
 	{
-		if((*op).type=='^')
-		{
-			bi1=(*op).from;
-			bi2=(*op).to;
-			if((*bi1).type=='1')
-			{
-				if((*bi2).type=='1')
-				{
-					(*bi1).value = pow(((*bi1).value),((*bi2).value));
-					op=(*bi2).to;
-					(*bi1).to=op;
-					(*op).from=bi1;
-					op=bi1;
-				}
-				else if((*bi2).type=='+')
-				{
-					bi2=(*bi2).to;
-					(*bi1).value = pow(((*bi1).value),((*bi2).value));
-					op=(*bi2).to;
-					(*bi1).to=op;
-					(*op).from=bi1;
-					op=bi1;
-				}
-				else if((*bi2).type=='(')
-				{}
-				else
-				{
-					error();
-					return 1;
-				}
-			}
-			else if((*bi1).type==')')
-			{}
-			else
-			{
-				error();
-				return 1;
-			}
-		}
-		op=(*op).to;
+		printf(" %c\n %c %c You can use + - * / ^ for addition, subtraction, multiplication,\n",179,179,16);
+		printf(" %c   division and power operation respectively.\n",179,179);
+		printf(" %c\n %c %c You can also add multiple of + and - together to get a single operation.\n",179,179,16);
+		printf(" %c\n",179);
+		printf(" %c         ++5 = 5\n",179);
+		printf(" %c        +-+4 = -4\n",179);
+		printf(" %c     3+--+-2 = 1\n",179);
+		printf(" %c\n %c %c Parentheses are recommended to avoid any confusion.\n",179,179,16);
+		printf(" %c\n",179);
+		printf(" %c       2/3*4 = 2.666667\n",179);
+		printf(" %c     2/(3*4) = 0.1666667\n",179);
+		printf(" %c\n %c %c Scientific notation is available\n",179,179,16);
+		printf(" %c\n",179);
+		printf(" %c         2E3 = 2000\n",179);
+		printf(" %c      1.2E-3 = 0.0012\n",179);
+		printf(" %c\n %c %c A constant Pi, pi, or PI %c 3.14 is available\n",179,179,16,247);
+		printf(" %c\n",179);
+		printf(" %c\n %c %c You can use <ans> as a number. <ans> is the answer of\n",179,179,16);
+		printf(" %c   the previous calculation. By default, <ans> = 0.\n",179);
+		printf(" %c\n",179);
+		printf(" %c        1 + 1 = 2\n",179);
+		printf(" %c      ans^0.5 = 1.414214\n",179);
+		printf(" %c\n %c %c You can use these basic mathematical functions:\n",179,179,16);
+		printf(" %c\n",179);
+		printf(" %c     sin, cos, tan, sinh, cosh, tanh, asin, acos, atan, asinh, acosh, atanh,\n",179);
+		printf(" %c     sqrt, exp, erf, erfc, log, and ln %c%c all in lower case.\n",179,196,196);
+		printf(" %c\n",179);
+		printf(" %c\n %c %c If everything is too messy, enter <clear> to reset the monitor\n",179,179,16);
+		printf(" %c   Note that <ans> will not be reset.\n",179);
+		printf(" %c\n %c %c You can enter <terminate> to exit the program.\n",179,179,16);
+		
 	}
-	return 0;
-}
-
-int error()
-{
-	printf(" %c\n %c    Syntax Error.\n",179,179);
-}
